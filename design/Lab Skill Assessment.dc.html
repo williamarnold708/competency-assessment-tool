@@ -1,0 +1,553 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="_ds/modernist-77a60492-947e-408a-9c8b-66ef7e89d0f7/styles.css">
+<script src="_ds/modernist-77a60492-947e-408a-9c8b-66ef7e89d0f7/_ds_bundle.js"></script>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+body{margin:0;background:var(--color-bg);font-family:var(--font-body);color:var(--color-text)}
+a{color:var(--color-accent-700)}a:hover{color:var(--color-accent-600)}
+button{font-family:inherit}
+@keyframes fillbar{from{width:0%}to{width:100%}}
+</style>
+</helmet>
+<div style="min-height:100vh;background:var(--color-bg);display:flex;flex-direction:column;align-items:center;gap:26px;padding:36px 20px 72px;box-sizing:border-box">
+
+<div style="width:100%;max-width:1000px;display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:16px;border-bottom:2px solid var(--color-text);padding-bottom:14px">
+<div>
+<div style="font:600 11px/1 var(--font-body);letter-spacing:.16em;text-transform:uppercase;color:var(--color-neutral-600);margin-bottom:10px">Competency Assessment · Mobile &amp; tablet</div>
+<h1 style="margin:0;font:800 34px/1.05 var(--font-body);letter-spacing:-0.02em">Audit, score, sign off</h1>
+</div>
+<div style="font:400 13px/1.45 var(--font-body);color:var(--color-neutral-700);max-width:340px;text-wrap:pretty">Clickable prototype. Rate items inline on one scrolling checklist, watch the score build, then hand the device over for sign-off.</div>
+</div>
+
+<div style="width:100%;max-width:1000px;display:flex;flex-wrap:wrap;gap:10px;align-items:center">
+<span style="font:600 10px/1 var(--font-body);letter-spacing:.14em;text-transform:uppercase;color:var(--color-neutral-600);margin-right:2px">Prototype controls</span>
+<sc-for list="{{ chrome }}" as="c" hint-placeholder-count="4">
+<button onClick="{{ c.onClick }}" style="border:2px solid var(--color-text);background:{{ c.bg }};color:{{ c.fg }};padding:8px 12px;cursor:pointer;font:600 11px/1 var(--font-body);letter-spacing:.1em;text-transform:uppercase">{{ c.label }}</button>
+</sc-for>
+<span style="font:400 12px/1.4 var(--font-body);color:var(--color-neutral-600)">{{ chromeNote }}</span>
+</div>
+
+<x-import component-from-global-scope="IOSDevice" from="./ios-frame.jsx" width="{{ frameW }}" height="{{ frameH }}" hint-size="402px,874px">
+<div style="min-height:100%;display:flex;flex-direction:column;background:var(--color-bg);font-family:'Archivo',system-ui,sans-serif;color:var(--color-text);box-sizing:border-box">
+
+<div style="position:sticky;top:0;z-index:5;background:var(--color-bg);padding:54px 20px 0">
+<div style="display:flex;align-items:center;gap:12px;min-height:36px">
+<button onClick="{{ back }}" aria-label="Back" style="width:36px;height:36px;flex:none;display:flex;align-items:center;justify-content:center;background:none;border:2px solid var(--color-text);color:var(--color-text);cursor:pointer;padding:0" style-hover="background:var(--color-text);color:var(--color-bg)">
+<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="square"><path d="M15 18l-6-6 6-6"></path></svg>
+</button>
+<div style="flex:1;min-width:0;font:800 23px/1.1 var(--font-body);letter-spacing:-0.02em">{{ screenTitle }}</div>
+<div style="font:600 10px/1.3 var(--font-body);letter-spacing:.12em;text-transform:uppercase;color:{{ syncColor }};text-align:right;max-width:110px">{{ syncLabel }}</div>
+</div>
+<div style="height:2px;background:var(--color-text);margin-top:12px"></div>
+<sc-if value="{{ showOfflineBar }}" hint-placeholder-val="{{ false }}">
+<div style="display:flex;align-items:center;gap:8px;background:var(--color-text);color:var(--color-bg);padding:9px 12px">
+<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="square"><path d="M2 2l20 20M8.5 16.5a5 5 0 017 0M5 12.5a10 10 0 0114 0"></path></svg>
+<span style="font:600 11px/1.3 var(--font-body)">Offline — {{ queueLabel }} held on device. Nothing is lost.</span>
+</div>
+</sc-if>
+</div>
+
+<div style="flex:1;padding:0 20px 28px">
+
+<sc-if value="{{ isHome }}" hint-placeholder-val="{{ true }}">
+<div style="padding-top:18px;display:flex;flex-direction:column;gap:20px">
+<button onClick="{{ startNew }}" style="display:flex;align-items:center;justify-content:space-between;gap:12px;width:100%;min-height:62px;background:var(--color-accent);color:#fff;border:none;padding:0 18px;cursor:pointer;text-align:left" style-hover="background:var(--color-accent-600)" style-active="background:var(--color-accent-700)">
+<span style="font:700 18px/1.1 var(--font-body);letter-spacing:-0.01em">Start new audit</span>
+<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="square"><path d="M5 12h14M13 6l6 6-6 6"></path></svg>
+</button>
+<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:2px;background:var(--color-text);border:2px solid var(--color-text)">
+<sc-for list="{{ homeStats }}" as="s" hint-placeholder-count="3">
+<div style="background:var(--color-bg);padding:12px 14px">
+<div style="font:600 10px/1 var(--font-body);letter-spacing:.14em;text-transform:uppercase;color:var(--color-neutral-600)">{{ s.label }}</div>
+<div style="font:800 30px/1.05 var(--font-body);letter-spacing:-0.03em;margin-top:6px">{{ s.value }}</div>
+</div>
+</sc-for>
+</div>
+<div>
+<div style="display:flex;align-items:baseline;justify-content:space-between;border-bottom:2px solid var(--color-text);padding-bottom:8px">
+<span style="font:600 11px/1 var(--font-body);letter-spacing:.16em;text-transform:uppercase">Audit history</span>
+<button onClick="{{ goAdmin }}" style="background:none;border:none;padding:0;cursor:pointer;font:600 11px/1 var(--font-body);letter-spacing:.1em;text-transform:uppercase;color:var(--color-accent-700)">Assessment items</button>
+</div>
+<sc-for list="{{ recents }}" as="rec" hint-placeholder-count="4">
+<button onClick="{{ rec.open }}" style="display:flex;flex-direction:column;gap:7px;width:100%;background:none;border:none;border-bottom:1px solid var(--color-neutral-300);padding:14px 2px;cursor:pointer;text-align:left" style-hover="background:var(--color-surface)">
+<div style="display:flex;align-items:baseline;justify-content:space-between;gap:10px;width:100%">
+<span style="font:700 16px/1.2 var(--font-body)">{{ rec.name }}</span>
+<span style="font:500 11px/1 var(--font-body);color:var(--color-neutral-600);white-space:nowrap">{{ rec.when }}</span>
+</div>
+<div style="display:flex;align-items:center;gap:8px;width:100%">
+<span style="font:400 13px/1.2 var(--font-body);color:var(--color-neutral-700);flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ rec.task }}</span>
+<span style="font:600 10px/1 var(--font-body);letter-spacing:.1em;text-transform:uppercase;padding:5px 8px;background:{{ rec.tagBg }};color:{{ rec.tagFg }}">{{ rec.status }}</span>
+</div>
+</button>
+</sc-for>
+</div>
+</div>
+</sc-if>
+
+<sc-if value="{{ isSetup }}" hint-placeholder-val="{{ false }}">
+<div style="padding-top:20px;display:flex;flex-direction:column;gap:24px">
+<div>
+<div style="font:600 11px/1 var(--font-body);letter-spacing:.16em;text-transform:uppercase;color:var(--color-neutral-600);margin-bottom:10px">Auditee</div>
+<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:8px">
+<sc-for list="{{ candidates }}" as="c" hint-placeholder-count="4">
+<button onClick="{{ c.onClick }}" style="display:flex;flex-direction:column;gap:3px;border:2px solid {{ c.bd }};background:{{ c.bg }};color:{{ c.fg }};padding:12px 14px;cursor:pointer;text-align:left;min-height:56px">
+<span style="font:700 15px/1.15 var(--font-body)">{{ c.name }}</span>
+<span style="font:400 11px/1.2 var(--font-body);opacity:.75">{{ c.role }}</span>
+</button>
+</sc-for>
+</div>
+</div>
+<div>
+<div style="font:600 11px/1 var(--font-body);letter-spacing:.16em;text-transform:uppercase;color:var(--color-neutral-600);margin-bottom:10px">Task</div>
+<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:8px">
+<sc-for list="{{ tasks }}" as="t" hint-placeholder-count="3">
+<button onClick="{{ t.onClick }}" style="border:2px solid {{ t.bd }};background:{{ t.bg }};color:{{ t.fg }};padding:13px 14px;cursor:pointer;text-align:left;font:600 14px/1.2 var(--font-body);min-height:50px">{{ t.name }}</button>
+</sc-for>
+</div>
+</div>
+<div>
+<div style="font:600 11px/1 var(--font-body);letter-spacing:.16em;text-transform:uppercase;color:var(--color-neutral-600);margin-bottom:10px">Expected level for this role</div>
+<div style="display:flex;gap:2px;background:var(--color-text);border:2px solid var(--color-text)">
+<sc-for list="{{ levels }}" as="l" hint-placeholder-count="5">
+<button onClick="{{ l.onClick }}" style="flex:1;background:{{ l.bg }};color:{{ l.fg }};border:none;padding:14px 0;cursor:pointer;font:800 19px/1 var(--font-body)">{{ l.n }}</button>
+</sc-for>
+</div>
+</div>
+<button onClick="{{ beginAudit }}" style="display:flex;align-items:center;justify-content:space-between;width:100%;min-height:58px;background:var(--color-accent);color:#fff;border:none;padding:0 18px;cursor:pointer;text-align:left" style-hover="background:var(--color-accent-600)" style-active="background:var(--color-accent-700)">
+<span style="font:700 17px/1.1 var(--font-body)">Begin · {{ setupSummary }}</span>
+<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="square"><path d="M5 12h14M13 6l6 6-6 6"></path></svg>
+</button>
+</div>
+</sc-if>
+
+<sc-if value="{{ isChecklist }}" hint-placeholder-val="{{ false }}">
+<div style="padding-top:16px;display:flex;flex-direction:column;gap:14px">
+<div style="display:flex;align-items:baseline;justify-content:space-between;gap:10px">
+<span style="font:400 13px/1.2 var(--font-body);color:var(--color-neutral-700)">{{ auditLine }}</span>
+<span style="font:700 13px/1 var(--font-body)">{{ progressLabel }}</span>
+</div>
+<div style="display:flex;gap:2px;height:8px">
+<sc-for list="{{ progressCells }}" as="p" hint-placeholder-count="8">
+<div style="flex:1;background:{{ p.bg }}"></div>
+</sc-for>
+</div>
+<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:0;border-top:2px solid var(--color-text);border-bottom:2px solid var(--color-text)">
+<sc-for list="{{ rows }}" as="row" hint-placeholder-count="8">
+<div style="background:{{ row.rowBg }};padding:14px 14px;border-bottom:1px solid var(--color-neutral-300);display:flex;flex-direction:column;gap:10px">
+<div style="display:flex;gap:10px;align-items:flex-start">
+<span style="font:700 12px/1.5 var(--font-body);color:var(--color-neutral-500);min-width:22px">{{ row.num }}</span>
+<div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:5px;padding-right:12px">
+<span style="font:500 15px/1.35 var(--font-body);text-wrap:pretty">{{ row.text }}</span>
+<div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap">
+<span style="font:600 9.5px/1 var(--font-body);letter-spacing:.12em;text-transform:uppercase;color:var(--color-neutral-600)">{{ row.cat }}</span>
+<sc-if value="{{ row.critical }}" hint-placeholder-val="{{ false }}">
+<span style="font:600 9.5px/1 var(--font-body);letter-spacing:.12em;text-transform:uppercase;background:var(--color-accent);color:#fff;padding:4px 6px">Critical</span>
+</sc-if>
+</div>
+</div>
+</div>
+<div style="display:flex;gap:6px">
+<sc-for list="{{ row.opts }}" as="opt" hint-placeholder-count="4">
+<button onClick="{{ opt.onClick }}" title="{{ opt.title }}" style="flex:1;min-height:46px;border:2px solid {{ opt.bd }};background:{{ opt.bg }};color:{{ opt.fg }};cursor:pointer;font:700 12px/1 var(--font-body);letter-spacing:.04em;display:flex;align-items:center;justify-content:center;padding:0 4px">{{ opt.label }}</button>
+</sc-for>
+</div>
+</div>
+</sc-for>
+</div>
+<button onClick="{{ advance }}" style="display:flex;align-items:center;justify-content:space-between;width:100%;min-height:58px;background:{{ advanceBg }};color:{{ advanceFg }};border:2px solid var(--color-text);padding:0 18px;cursor:pointer;text-align:left;margin-top:4px">
+<span style="font:700 17px/1.1 var(--font-body)">{{ advanceLabel }}</span>
+<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="square"><path d="M5 12h14M13 6l6 6-6 6"></path></svg>
+</button>
+</div>
+</sc-if>
+
+<sc-if value="{{ isResult }}" hint-placeholder-val="{{ false }}">
+<div style="padding-top:18px;display:flex;flex-direction:column;gap:22px">
+<div style="background:var(--color-surface);padding:10px 12px;font:500 13px/1.2 var(--font-body)">{{ auditLine }}</div>
+<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:18px">
+<div>
+<div style="font:600 10.5px/1 var(--font-body);letter-spacing:.14em;text-transform:uppercase;color:var(--color-neutral-600)">K&amp;P score</div>
+<div style="font:800 48px/1 var(--font-body);letter-spacing:-0.045em;margin-top:8px">{{ kpScore }}</div>
+<div style="height:6px;background:var(--color-neutral-300);margin-top:10px"><div style="height:6px;background:var(--color-text);width:{{ kpBar }}"></div></div>
+</div>
+<div>
+<div style="font:600 10.5px/1 var(--font-body);letter-spacing:.14em;text-transform:uppercase;color:var(--color-neutral-600)">TS score</div>
+<div style="font:800 48px/1 var(--font-body);letter-spacing:-0.045em;margin-top:8px">{{ tsScore }}</div>
+<div style="height:6px;background:var(--color-neutral-300);margin-top:10px"><div style="height:6px;background:var(--color-text);width:{{ tsBar }}"></div></div>
+</div>
+</div>
+<div style="border-top:2px solid var(--color-text);padding-top:16px;display:flex;align-items:flex-end;gap:20px;flex-wrap:wrap">
+<div>
+<div style="font:600 10.5px/1 var(--font-body);letter-spacing:.14em;text-transform:uppercase;color:var(--color-neutral-600)">Awarded level</div>
+<div style="font:800 92px/0.85 var(--font-body);letter-spacing:-0.055em;margin-top:12px;color:{{ awardColor }}">{{ awarded }}</div>
+</div>
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:2px;background:var(--color-text);border:2px solid var(--color-text);flex:1;min-width:180px">
+<div style="background:var(--color-surface);padding:10px 12px">
+<div style="font:600 10px/1 var(--font-body);letter-spacing:.12em;text-transform:uppercase;color:var(--color-neutral-600)">Expected</div>
+<div style="font:800 30px/1 var(--font-body);margin-top:6px">{{ expected }}</div>
+</div>
+<div style="background:var(--color-surface);padding:10px 12px">
+<div style="font:600 10px/1 var(--font-body);letter-spacing:.12em;text-transform:uppercase;color:var(--color-neutral-600)">Gap</div>
+<div style="font:800 30px/1 var(--font-body);margin-top:6px;color:{{ gapColor }}">{{ gap }}</div>
+</div>
+</div>
+</div>
+<div>
+<div style="font:600 11px/1 var(--font-body);letter-spacing:.16em;text-transform:uppercase;border-bottom:2px solid var(--color-text);padding-bottom:8px">Where the marks went</div>
+<sc-for list="{{ breakdown }}" as="b" hint-placeholder-count="4">
+<div style="display:flex;align-items:center;gap:12px;border-bottom:1px solid var(--color-neutral-300);padding:11px 2px">
+<span style="flex:1;min-width:0;font:500 14px/1.25 var(--font-body)">{{ b.label }}</span>
+<span style="font:700 14px/1 var(--font-body);color:{{ b.color }}">{{ b.value }}</span>
+</div>
+</sc-for>
+</div>
+<button onClick="{{ goSignoff }}" style="display:flex;align-items:center;justify-content:space-between;width:100%;min-height:58px;background:var(--color-accent);color:#fff;border:none;padding:0 18px;cursor:pointer;text-align:left" style-hover="background:var(--color-accent-600)" style-active="background:var(--color-accent-700)">
+<span style="font:700 17px/1.1 var(--font-body)">Hand over for sign-off</span>
+<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="square"><path d="M5 12h14M13 6l6 6-6 6"></path></svg>
+</button>
+</div>
+</sc-if>
+
+<sc-if value="{{ isSignoff }}" hint-placeholder-val="{{ false }}">
+<div style="padding-top:18px;display:flex;flex-direction:column;gap:20px">
+<div style="border:2px solid var(--color-text);padding:16px">
+<div style="font:600 10.5px/1 var(--font-body);letter-spacing:.14em;text-transform:uppercase;color:var(--color-neutral-600)">Handing over to</div>
+<div style="font:800 26px/1.1 var(--font-body);letter-spacing:-0.02em;margin-top:8px">{{ candidateName }}</div>
+<div style="font:400 13px/1.4 var(--font-body);color:var(--color-neutral-700);margin-top:8px;text-wrap:pretty">You are confirming you observed this assessment and agree the result recorded above. Awarded level {{ awarded }} against an expected {{ expected }}.</div>
+</div>
+<sc-if value="{{ notSigned }}" hint-placeholder-val="{{ true }}">
+<div style="display:flex;flex-direction:column;gap:10px">
+<button onPointerDown="{{ holdStart }}" onPointerUp="{{ holdEnd }}" onPointerLeave="{{ holdEnd }}" onClick="{{ tapConfirm }}" style="position:relative;overflow:hidden;width:100%;min-height:72px;background:var(--color-accent);color:#fff;border:none;padding:0 18px;cursor:pointer;text-align:left;display:flex;align-items:center" style-hover="background:var(--color-accent-600)">
+<sc-if value="{{ holding }}" hint-placeholder-val="{{ false }}">
+<span style="position:absolute;left:0;top:0;bottom:0;background:var(--color-accent-700);animation:fillbar 900ms linear forwards"></span>
+</sc-if>
+<span style="position:relative;font:700 19px/1.1 var(--font-body);letter-spacing:-0.01em">{{ confirmLabel }}</span>
+</button>
+<div style="font:400 12px/1.4 var(--font-body);color:var(--color-neutral-600)">{{ confirmHint }}</div>
+</div>
+</sc-if>
+<sc-if value="{{ signed }}" hint-placeholder-val="{{ false }}">
+<div style="border:2px solid var(--color-text);background:var(--color-text);color:var(--color-bg);padding:16px">
+<div style="display:flex;align-items:center;gap:8px">
+<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="square"><path d="M4 12.5l5 5L20 6.5"></path></svg>
+<span style="font:700 15px/1 var(--font-body)">Auditee confirmed</span>
+</div>
+<div style="font:800 30px/1.1 var(--font-body);letter-spacing:-0.02em;margin-top:12px">{{ signedTime }}</div>
+<div style="font:500 12px/1.4 var(--font-body);opacity:.75;margin-top:6px">{{ signedDate }} · {{ tzLabel }}</div>
+<div style="font:400 12px/1.45 var(--font-body);opacity:.75;margin-top:10px;border-top:1px solid rgba(243,242,242,.3);padding-top:10px">Recorded against this audit only. Signed by {{ candidateName }} on this device. Locked — reopening needs a supervisor.</div>
+</div>
+<button onClick="{{ finish }}" style="display:flex;align-items:center;justify-content:space-between;width:100%;min-height:56px;background:none;color:var(--color-text);border:2px solid var(--color-text);padding:0 18px;cursor:pointer;text-align:left" style-hover="background:var(--color-text);color:var(--color-bg)">
+<span style="font:700 16px/1.1 var(--font-body)">Done — back to home</span>
+</button>
+</sc-if>
+</div>
+</sc-if>
+
+<sc-if value="{{ isRecord }}" hint-placeholder-val="{{ false }}">
+<div style="padding-top:18px;display:flex;flex-direction:column;gap:18px">
+<div style="background:var(--color-surface);padding:10px 12px;font:500 13px/1.2 var(--font-body)">{{ recordLine }}</div>
+<div style="display:grid;grid-template-columns:repeat(2,1fr);gap:2px;background:var(--color-text);border:2px solid var(--color-text)">
+<sc-for list="{{ recordStats }}" as="r" hint-placeholder-count="4">
+<div style="background:var(--color-bg);padding:11px 12px">
+<div style="font:600 10px/1 var(--font-body);letter-spacing:.12em;text-transform:uppercase;color:var(--color-neutral-600)">{{ r.label }}</div>
+<div style="font:800 26px/1 var(--font-body);margin-top:6px">{{ r.value }}</div>
+</div>
+</sc-for>
+</div>
+<div>
+<div style="font:600 11px/1 var(--font-body);letter-spacing:.16em;text-transform:uppercase;border-bottom:2px solid var(--color-text);padding-bottom:8px">Audit trail</div>
+<sc-for list="{{ trail }}" as="t" hint-placeholder-count="4">
+<div style="display:flex;gap:12px;border-bottom:1px solid var(--color-neutral-300);padding:12px 2px">
+<span style="font:600 12px/1.3 var(--font-body);color:var(--color-neutral-600);min-width:74px">{{ t.time }}</span>
+<div style="flex:1;min-width:0">
+<div style="font:600 14px/1.25 var(--font-body)">{{ t.what }}</div>
+<div style="font:400 12px/1.3 var(--font-body);color:var(--color-neutral-700);margin-top:3px">{{ t.who }}</div>
+</div>
+</div>
+</sc-for>
+</div>
+<div style="font:400 12px/1.45 var(--font-body);color:var(--color-neutral-600);text-wrap:pretty">All times shown in {{ tzLabel }} — stored in UTC, converted for display, so a record never changes hour when it syncs.</div>
+</div>
+</sc-if>
+
+<sc-if value="{{ isAdmin }}" hint-placeholder-val="{{ false }}">
+<div style="padding-top:18px;display:flex;flex-direction:column;gap:16px">
+<div style="font:400 13px/1.45 var(--font-body);color:var(--color-neutral-700);text-wrap:pretty">The item bank behind every audit. Edits apply to audits started from now on; completed audits keep the wording they were scored against.</div>
+<sc-for list="{{ adminGroups }}" as="g" hint-placeholder-count="2">
+<div>
+<div style="display:flex;align-items:baseline;justify-content:space-between;border-bottom:2px solid var(--color-text);padding-bottom:8px">
+<span style="font:600 11px/1 var(--font-body);letter-spacing:.16em;text-transform:uppercase">{{ g.name }}</span>
+<span style="font:500 11px/1 var(--font-body);color:var(--color-neutral-600)">{{ g.meta }}</span>
+</div>
+<sc-for list="{{ g.items }}" as="it" hint-placeholder-count="5">
+<div style="display:flex;gap:10px;align-items:flex-start;border-bottom:1px solid var(--color-neutral-300);padding:11px 2px">
+<span style="font:700 12px/1.5 var(--font-body);color:var(--color-neutral-500);min-width:22px">{{ it.num }}</span>
+<span style="flex:1;min-width:0;font:400 14px/1.3 var(--font-body);text-wrap:pretty">{{ it.text }}</span>
+<sc-if value="{{ it.critical }}" hint-placeholder-val="{{ false }}">
+<span style="font:600 9.5px/1 var(--font-body);letter-spacing:.12em;text-transform:uppercase;background:var(--color-accent);color:#fff;padding:4px 6px;white-space:nowrap">Critical</span>
+</sc-if>
+</div>
+</sc-for>
+</div>
+</sc-for>
+</div>
+</sc-if>
+
+</div>
+</div>
+</x-import>
+
+<div style="width:100%;max-width:1000px;border-top:2px solid var(--color-text);padding-top:14px;font:400 12.5px/1.6 var(--font-body);color:var(--color-neutral-700);text-wrap:pretty">
+Next: a supervisor reopen path for locked records, a bulk CSV import for the item bank, and a printable audit certificate. Tell me which to build.
+</div>
+
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;confirmMode&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;Hold to confirm&quot;,&quot;Single tap&quot;],&quot;default&quot;:&quot;Hold to confirm&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Sign-off&quot;},&quot;showCritical&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;Checklist&quot;},&quot;timezoneLabel&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;default&quot;:&quot;Europe/London · BST&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Sign-off&quot;}}">
+const KP = [
+  { t: "States the purpose of the IBU analysis and its spec range", c: "Purpose", crit: false },
+  { t: "Confirms sample identity against the batch record", c: "Traceability", crit: true },
+  { t: "Selects correct glassware and checks the calibration date", c: "Equipment", crit: false },
+  { t: "Describes the extraction solvent hazard and its controls", c: "Safety", crit: true },
+  { t: "Explains the spectrophotometer blanking procedure", c: "Method", crit: false },
+  { t: "States the acceptance criteria for duplicate agreement", c: "Method", crit: false },
+  { t: "Identifies when a result must be repeated", c: "Judgement", crit: false },
+  { t: "Describes the correct waste disposal route", c: "Safety", crit: false },
+];
+const TS = [
+  { t: "Dons PPE correctly before starting", c: "Safety", crit: true },
+  { t: "Pipettes 10 mL of sample with correct technique", c: "Technique", crit: false },
+  { t: "Adds acid and iso-octane, caps securely", c: "Technique", crit: true },
+  { t: "Shakes for the full 15 minutes on the mechanical shaker", c: "Method", crit: false },
+  { t: "Centrifuges and transfers the upper layer cleanly", c: "Technique", crit: false },
+  { t: "Reads absorbance at 275 nm against the blank", c: "Instrument", crit: false },
+  { t: "Records the result in LIMS to one decimal place", c: "Recording", crit: false },
+];
+const CANDIDATES = [
+  { name: "Arnold William", role: "Analyst · Level 5 expected" },
+  { name: "Priya Raman", role: "Analyst · Level 4 expected" },
+  { name: "Tom Okafor", role: "Technician · Level 3 expected" },
+  { name: "Lena Brandt", role: "Analyst · Level 5 expected" },
+];
+const TASKS = ["IBU Analysis", "Original Gravity", "Micro Plating", "Dissolved O₂"];
+const OPTS = [
+  { k: "c", label: "Correct", title: "Correct" },
+  { k: "p", label: "Partial", title: "Partially correct" },
+  { k: "x", label: "Incorrect", title: "Incorrect" },
+  { k: "n", label: "N/A", title: "Not applicable" },
+];
+const INK = "var(--color-text)", RED = "var(--color-accent)", GREY = "var(--color-neutral-600)", PAPER = "var(--color-bg)";
+
+class Component extends DCLogic {
+  state = {
+    screen: "home", device: "phone", online: true, queue: 0, pending: 0,
+    cand: 0, task: 0, expected: 5, ratings: {}, holding: false, signedAt: null,
+  };
+
+  componentWillUnmount() { clearTimeout(this._hold); clearTimeout(this._sync); }
+
+  go(s) { this.setState({ screen: s }); }
+
+  write() {
+    if (!this.state.online) { this.setState(s => ({ queue: s.queue + 1 })); return; }
+    this.setState(s => ({ pending: s.pending + 1 }));
+    clearTimeout(this._sync);
+    this._sync = setTimeout(() => this.setState({ pending: 0 }), 700);
+  }
+
+  rate(sec, i, k) {
+    const key = sec + i;
+    this.setState(s => ({ ratings: Object.assign({}, s.ratings, { [key]: s.ratings[key] === k ? undefined : k }) }));
+    this.write();
+  }
+
+  items(sec) { return sec === "kp" ? KP : TS; }
+
+  score(sec) {
+    const list = this.items(sec); let got = 0, of = 0;
+    list.forEach((_, i) => {
+      const v = this.state.ratings[sec + i];
+      if (v === undefined || v === "n") return;
+      of += 1; got += v === "c" ? 1 : v === "p" ? 0.5 : 0;
+    });
+    return of ? Math.round((got / of) * 100) : 0;
+  }
+
+  rated(sec) { return this.items(sec).filter((_, i) => this.state.ratings[sec + i] !== undefined).length; }
+
+  level(pct) { return pct >= 95 ? 5 : pct >= 90 ? 4 : pct >= 80 ? 3 : pct >= 65 ? 2 : 1; }
+
+  fmt(d, opts) { return new Intl.DateTimeFormat("en-GB", Object.assign({ timeZone: "Europe/London" }, opts)).format(d); }
+
+  renderVals() {
+    const S = this.state;
+    const tz = this.props.timezoneLabel ?? "Europe/London · BST";
+    const hold = (this.props.confirmMode ?? "Hold to confirm") === "Hold to confirm";
+    const markCritical = this.props.showCritical ?? true;
+    const sec = S.screen === "ts" ? "ts" : "kp";
+    const kp = this.score("kp"), ts = this.score("ts");
+    const awarded = this.level(Math.min(kp, ts));
+    const gapN = awarded - S.expected;
+    const cand = CANDIDATES[S.cand], task = TASKS[S.task];
+    const titles = { home: "Audits", setup: "New audit", kp: "Knowledge", ts: "Technique", result: "Result", signoff: "Sign-off", record: "Record", admin: "Item bank" };
+    const backTo = { setup: "home", kp: "setup", ts: "kp", result: "ts", signoff: "result", record: "home", admin: "home" };
+
+    const pick = (on, fill) => on
+      ? { bg: fill, fg: "#fff", bd: fill }
+      : { bg: "none", fg: INK, bd: "var(--color-neutral-300)" };
+
+    const rows = this.items(sec).map((it, i) => {
+      const v = S.ratings[sec + i];
+      return {
+        num: String(i + 1).padStart(2, "0"),
+        text: it.t, cat: it.c, critical: markCritical && it.crit,
+        rowBg: v === undefined ? PAPER : "var(--color-surface)",
+        opts: OPTS.map(o => {
+          const on = v === o.k;
+          const fill = o.k === "c" ? INK : o.k === "p" ? "var(--color-neutral-700)" : o.k === "x" ? RED : "var(--color-neutral-500)";
+          const st = pick(on, fill);
+          return { label: o.label, title: o.title, bg: st.bg, fg: st.fg, bd: st.bd, onClick: () => this.rate(sec, i, o.k) };
+        }),
+      };
+    });
+
+    const doneCount = this.rated(sec), total = this.items(sec).length;
+    const allDone = doneCount === total;
+
+    return {
+      // chrome
+      frameW: S.device === "phone" ? 402 : 744,
+      frameH: S.device === "phone" ? 874 : 1000,
+      chrome: [
+        { label: "Phone", bg: S.device === "phone" ? INK : "none", fg: S.device === "phone" ? PAPER : INK, onClick: () => this.setState({ device: "phone" }) },
+        { label: "Tablet", bg: S.device === "tablet" ? INK : "none", fg: S.device === "tablet" ? PAPER : INK, onClick: () => this.setState({ device: "tablet" }) },
+        { label: S.online ? "Online" : "Offline", bg: S.online ? "none" : RED, fg: S.online ? INK : "#fff", onClick: () => this.setState(s => ({ online: !s.online, queue: s.online ? s.queue : 0 })) },
+        { label: "Reset", bg: "none", fg: INK, onClick: () => this.setState({ screen: "home", ratings: {}, signedAt: null, queue: 0, pending: 0 }) },
+      ],
+      chromeNote: S.online ? "Flip offline mid-audit to see writes queue." : "Ratings are queued on device until you go back online.",
+
+      screenTitle: titles[S.screen],
+      back: () => this.go(backTo[S.screen] || "home"),
+      syncLabel: !S.online ? "Offline" : S.pending ? "Saving…" : "All saved",
+      syncColor: !S.online ? RED : S.pending ? GREY : "var(--color-neutral-700)",
+      showOfflineBar: !S.online && S.queue > 0,
+      queueLabel: S.queue === 1 ? "1 rating" : S.queue + " ratings",
+      tzLabel: tz,
+
+      isHome: S.screen === "home",
+      isSetup: S.screen === "setup",
+      isChecklist: S.screen === "kp" || S.screen === "ts",
+      isResult: S.screen === "result",
+      isSignoff: S.screen === "signoff",
+      isRecord: S.screen === "record",
+      isAdmin: S.screen === "admin",
+
+      startNew: () => this.setState({ screen: "setup", ratings: {}, signedAt: null }),
+      goAdmin: () => this.go("admin"),
+      homeStats: [
+        { label: "This week", value: "12" },
+        { label: "Awaiting sign-off", value: "2" },
+        { label: "Below expected", value: "3" },
+      ],
+      recentCount: "4",
+      recents: [
+        { name: "Arnold William", task: "IBU Analysis · Level 4 awarded", when: "Today 14:20", status: "Signed", tagBg: INK, tagFg: PAPER, open: () => this.go("record") },
+        { name: "Priya Raman", task: "Original Gravity · Level 4 awarded", when: "Yesterday", status: "Signed", tagBg: INK, tagFg: PAPER, open: () => this.go("record") },
+        { name: "Tom Okafor", task: "Micro Plating · Level 2 awarded", when: "11 Sep", status: "Unsigned", tagBg: RED, tagFg: "#fff", open: () => this.go("record") },
+        { name: "Lena Brandt", task: "Dissolved O₂ · Level 5 awarded", when: "9 Sep", status: "Signed", tagBg: INK, tagFg: PAPER, open: () => this.go("record") },
+      ],
+
+      candidates: CANDIDATES.map((c, i) => Object.assign({}, c, {
+        bg: S.cand === i ? INK : "none", fg: S.cand === i ? PAPER : INK, bd: S.cand === i ? INK : "var(--color-neutral-300)",
+        onClick: () => this.setState({ cand: i }),
+      })),
+      tasks: TASKS.map((t, i) => ({
+        name: t, bg: S.task === i ? INK : "none", fg: S.task === i ? PAPER : INK, bd: S.task === i ? INK : "var(--color-neutral-300)",
+        onClick: () => this.setState({ task: i }),
+      })),
+      levels: [1, 2, 3, 4, 5].map(n => ({
+        n: n, bg: S.expected === n ? RED : PAPER, fg: S.expected === n ? "#fff" : INK,
+        onClick: () => this.setState({ expected: n }),
+      })),
+      setupSummary: cand.name.split(" ")[0] + " · " + task,
+      beginAudit: () => this.go("kp"),
+
+      auditLine: cand.name + " · " + task,
+      progressLabel: doneCount + " / " + total + " rated",
+      progressCells: this.items(sec).map((_, i) => {
+        const v = S.ratings[sec + i];
+        return { bg: v === undefined ? "var(--color-neutral-300)" : v === "x" ? RED : v === "p" ? "var(--color-neutral-500)" : INK };
+      }),
+      rows: rows,
+      advanceLabel: sec === "kp"
+        ? (allDone ? "Continue to Technique" : "Rate all " + total + " to continue")
+        : (allDone ? "See result" : "Rate all " + total + " to continue"),
+      advanceBg: allDone ? INK : "none",
+      advanceFg: allDone ? PAPER : "var(--color-neutral-500)",
+      advance: () => { if (allDone) this.go(sec === "kp" ? "ts" : "result"); },
+
+      kpScore: kp + "%", tsScore: ts + "%", kpBar: kp + "%", tsBar: ts + "%",
+      awarded: awarded, expected: S.expected,
+      gap: gapN > 0 ? "+" + gapN : String(gapN),
+      gapColor: gapN < 0 ? RED : INK,
+      awardColor: gapN < 0 ? RED : INK,
+      breakdown: [
+        { label: "Knowledge items rated correct", value: KP.filter((_, i) => S.ratings["kp" + i] === "c").length + " of " + KP.length, color: INK },
+        { label: "Technique items rated correct", value: TS.filter((_, i) => S.ratings["ts" + i] === "c").length + " of " + TS.length, color: INK },
+        { label: "Critical items failed", value: String(KP.filter((it, i) => it.crit && S.ratings["kp" + i] === "x").length + TS.filter((it, i) => it.crit && S.ratings["ts" + i] === "x").length), color: RED },
+        { label: "Marked not applicable", value: String(Object.values(S.ratings).filter(v => v === "n").length), color: GREY },
+      ],
+      goSignoff: () => this.go("signoff"),
+
+      candidateName: cand.name,
+      notSigned: !S.signedAt,
+      signed: !!S.signedAt,
+      holding: S.holding,
+      confirmLabel: hold ? (S.holding ? "Keep holding…" : "Hold to confirm") : "Auditee confirmed",
+      confirmHint: hold
+        ? "Press and hold for one second — stops an accidental tap locking the record."
+        : "One tap records the confirmation and locks this audit.",
+      holdStart: () => {
+        if (!hold) return;
+        this.setState({ holding: true });
+        clearTimeout(this._hold);
+        this._hold = setTimeout(() => { this.setState({ holding: false, signedAt: new Date() }); this.write(); }, 900);
+      },
+      holdEnd: () => { if (hold) { clearTimeout(this._hold); this.setState({ holding: false }); } },
+      tapConfirm: () => { if (!hold) { this.setState({ signedAt: new Date() }); this.write(); } },
+      signedTime: S.signedAt ? this.fmt(S.signedAt, { hour: "2-digit", minute: "2-digit", hour12: false }) : "",
+      signedDate: S.signedAt ? this.fmt(S.signedAt, { weekday: "short", day: "numeric", month: "short", year: "numeric" }) : "",
+      finish: () => this.setState({ screen: "home", ratings: {}, signedAt: null }),
+
+      recordLine: "Arnold William · IBU Analysis · 13 Sep 2026",
+      recordStats: [
+        { label: "K&P", value: "100%" }, { label: "TS", value: "93%" },
+        { label: "Awarded", value: "4" }, { label: "Expected", value: "5" },
+      ],
+      trail: [
+        { time: "14:02", what: "Audit started", who: "R. Hale (auditor)" },
+        { time: "14:11", what: "Knowledge section completed — 8 of 8 rated", who: "R. Hale" },
+        { time: "14:19", what: "Technique section completed — 1 partial", who: "R. Hale" },
+        { time: "14:20", what: "Auditee confirmed", who: "A. William, on shared device" },
+      ],
+
+      adminGroups: [
+        { name: "Knowledge & Practice", meta: KP.length + " items · IBU Analysis", items: KP.map((it, i) => ({ num: String(i + 1).padStart(2, "0"), text: it.t, critical: it.crit })) },
+        { name: "Technique & Skill", meta: TS.length + " items · IBU Analysis", items: TS.map((it, i) => ({ num: String(i + 1).padStart(2, "0"), text: it.t, critical: it.crit })) },
+      ],
+    };
+  }
+}
+</script>
+</body>
+</html>
