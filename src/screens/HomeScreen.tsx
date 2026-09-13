@@ -1,11 +1,12 @@
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { useFocusEffect } from '@react-navigation/native';
 import React, { useCallback, useState } from 'react';
-import { FlatList, Pressable, SafeAreaView, StyleSheet, Text, View } from 'react-native';
+import { Alert, FlatList, Pressable, SafeAreaView, StyleSheet, Text, View } from 'react-native';
 import Button from '../components/Button';
 import { Divider } from '../components/ScreenHeader';
 import { StatusTag } from '../components/Tag';
 import { useAuth } from '../context/AuthContext';
+import { exportAllAuditsCsv, exportAllAuditsPdf } from '../lib/exportAudit';
 import { formatWhen } from '../lib/format';
 import { RootStackParamList } from '../navigation/types';
 import { listRecentAudits } from '../services/audits';
@@ -19,6 +20,7 @@ export default function HomeScreen({ navigation }: Props) {
   const { auditorName } = useAuth();
   const [audits, setAudits] = useState<Audit[]>([]);
   const [loading, setLoading] = useState(true);
+  const [exporting, setExporting] = useState(false);
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -40,6 +42,31 @@ export default function HomeScreen({ navigation }: Props) {
   const thisWeek = audits.filter((a) => a.createdAt >= weekAgo).length;
   const awaitingSignoff = audits.filter((a) => a.status === 'awaiting_signoff').length;
   const belowExpected = audits.filter((a) => a.status === 'signed' && a.awardedLevel < a.expectedLevel).length;
+
+  async function runExport(format: 'csv' | 'pdf') {
+    setExporting(true);
+    try {
+      const all = await listRecentAudits(500);
+      if (all.length === 0) {
+        Alert.alert('Nothing to export', 'There are no audits yet.');
+        return;
+      }
+      if (format === 'csv') await exportAllAuditsCsv(all);
+      else await exportAllAuditsPdf(all);
+    } catch (e: any) {
+      Alert.alert('Could not export', e?.message ?? 'Something went wrong.');
+    } finally {
+      setExporting(false);
+    }
+  }
+
+  function onExportAll() {
+    Alert.alert('Export audit history', 'Choose a format', [
+      { text: 'CSV', onPress: () => runExport('csv') },
+      { text: 'PDF', onPress: () => runExport('pdf') },
+      { text: 'Cancel', style: 'cancel' },
+    ]);
+  }
 
   return (
     <SafeAreaView style={styles.screen}>
@@ -79,9 +106,14 @@ export default function HomeScreen({ navigation }: Props) {
             <View>
               <View style={styles.historyHeader}>
                 <Text style={styles.sectionLabel}>Audit history</Text>
-                <Pressable onPress={() => navigation.navigate('AdminItemBank')}>
-                  <Text style={styles.link}>Assessment items</Text>
-                </Pressable>
+                <View style={{ flexDirection: 'row', gap: 14 }}>
+                  <Pressable onPress={onExportAll} disabled={exporting}>
+                    <Text style={styles.link}>{exporting ? 'Exporting…' : 'Export all'}</Text>
+                  </Pressable>
+                  <Pressable onPress={() => navigation.navigate('AdminItemBank')}>
+                    <Text style={styles.link}>Assessment items</Text>
+                  </Pressable>
+                </View>
               </View>
               <Divider />
             </View>

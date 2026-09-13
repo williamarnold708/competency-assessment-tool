@@ -1,9 +1,10 @@
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import React, { useEffect, useState } from 'react';
-import { ActivityIndicator, SafeAreaView, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { ActivityIndicator, Alert, SafeAreaView, ScrollView, StyleSheet, Text, View } from 'react-native';
 import Button from '../components/Button';
 import ScreenHeader from '../components/ScreenHeader';
-import { formatFullDate, formatWhen } from '../lib/format';
+import { exportAuditCsv, exportAuditPdf } from '../lib/exportAudit';
+import { formatFullDate } from '../lib/format';
 import { RootStackParamList } from '../navigation/types';
 import { getAudit } from '../services/audits';
 import { Audit } from '../types';
@@ -15,6 +16,7 @@ export default function RecordScreen({ route, navigation }: Props) {
   const { auditId } = route.params;
   const [audit, setAudit] = useState<Audit | null>(null);
   const [loading, setLoading] = useState(true);
+  const [exporting, setExporting] = useState<'csv' | 'pdf' | null>(null);
 
   useEffect(() => {
     (async () => {
@@ -80,6 +82,45 @@ export default function RecordScreen({ route, navigation }: Props) {
           never changes hour when it syncs.
         </Text>
 
+        <View style={styles.exportRow}>
+          <View style={{ flex: 1 }}>
+            <Button
+              label="Download PDF"
+              variant="secondary"
+              loading={exporting === 'pdf'}
+              onPress={async () => {
+                setExporting('pdf');
+                try {
+                  await exportAuditPdf(audit);
+                } catch (e: any) {
+                  Alert.alert('Could not export', e?.message ?? 'Something went wrong.');
+                } finally {
+                  setExporting(null);
+                }
+              }}
+              fullWidth
+            />
+          </View>
+          <View style={{ flex: 1 }}>
+            <Button
+              label="Download CSV"
+              variant="secondary"
+              loading={exporting === 'csv'}
+              onPress={async () => {
+                setExporting('csv');
+                try {
+                  await exportAuditCsv(audit);
+                } catch (e: any) {
+                  Alert.alert('Could not export', e?.message ?? 'Something went wrong.');
+                } finally {
+                  setExporting(null);
+                }
+              }}
+              fullWidth
+            />
+          </View>
+        </View>
+
         {audit.status === 'in_progress' && (
           <Button
             label="Continue audit"
@@ -111,5 +152,6 @@ const styles = StyleSheet.create({
   trailTime: { fontFamily: font.semibold, fontSize: 12, color: color.neutral600, minWidth: 60 },
   trailWhat: { fontFamily: font.semibold, fontSize: 14, color: color.text },
   trailWho: { fontFamily: font.body, fontSize: 12, color: color.neutral700, marginTop: 3 },
+  exportRow: { flexDirection: 'row', gap: 8 },
   tzNote: { fontFamily: font.body, fontSize: 12, color: color.neutral600, lineHeight: 17 },
 });
