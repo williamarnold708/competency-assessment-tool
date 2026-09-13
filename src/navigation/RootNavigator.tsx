@@ -3,8 +3,11 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import React from 'react';
 import { ActivityIndicator, View } from 'react-native';
 import { useAuth } from '../context/AuthContext';
+import AdminBulkAddItemsScreen from '../screens/AdminBulkAddItemsScreen';
+import AdminCandidatesScreen from '../screens/AdminCandidatesScreen';
 import AdminItemBankScreen from '../screens/AdminItemBankScreen';
 import AdminItemFormScreen from '../screens/AdminItemFormScreen';
+import AdminTaskDetailScreen from '../screens/AdminTaskDetailScreen';
 import ChecklistScreen from '../screens/ChecklistScreen';
 import HomeScreen from '../screens/HomeScreen';
 import LoginScreen from '../screens/LoginScreen';
@@ -47,7 +50,10 @@ export default function RootNavigator() {
             <Stack.Screen name="Signoff" component={SignoffScreen} />
             <Stack.Screen name="Record" component={RecordScreen} />
             <Stack.Screen name="AdminItemBank" component={AdminItemBankScreen} />
+            <Stack.Screen name="AdminTaskDetail" component={AdminTaskDetailScreen} />
+            <Stack.Screen name="AdminBulkAddItems" component={AdminBulkAddItemsScreen} />
             <Stack.Screen name="AdminItemForm" component={AdminItemFormScreen} />
+            <Stack.Screen name="AdminCandidates" component={AdminCandidatesScreen} />
           </>
         )}
       </Stack.Navigator>

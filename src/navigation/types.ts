@@ -9,5 +9,8 @@ export type RootStackParamList = {
   Signoff: { auditId: string };
   Record: { auditId: string };
   AdminItemBank: undefined;
+  AdminTaskDetail: { processId: string; processName: string };
+  AdminBulkAddItems: { processId: string; section: Section };
   AdminItemForm: { processId: string; section: Section; itemId?: string };
+  AdminCandidates: undefined;
 };

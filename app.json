@@ -35,7 +35,11 @@
         "storageBucket": "competency-assess-2022-ab60a.firebasestorage.app",
         "messagingSenderId": "1015420765639",
         "appId": "1:1015420765639:web:07c34aadf20a9e169c85e2"
+      },
+      "eas": {
+        "projectId": "ff8b8a79-2184-4838-8a15-1a6a3dd7f7fb"
       }
-    }
+    },
+    "owner": "arnoldwilliam"
   }
 }
