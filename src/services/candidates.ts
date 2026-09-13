@@ -1,23 +1,21 @@
-import { addDoc, collection, deleteDoc, doc, getDocs, orderBy, query, updateDoc } from 'firebase/firestore';
-import { db } from './firebase';
+import { addDoc, deleteDoc, getDocs, orderBy, query, updateDoc } from 'firebase/firestore';
 import { Candidate } from '../types';
-
-const col = collection(db, 'candidates');
+import { userCollection, userDoc } from './scope';
 
 export async function listCandidates(): Promise<Candidate[]> {
-  const snap = await getDocs(query(col, orderBy('name')));
+  const snap = await getDocs(query(userCollection('candidates'), orderBy('name')));
   return snap.docs.map((d) => ({ id: d.id, ...(d.data() as Omit<Candidate, 'id'>) }));
 }
 
 export async function addCandidate(data: Omit<Candidate, 'id'>): Promise<string> {
-  const ref = await addDoc(col, data);
+  const ref = await addDoc(userCollection('candidates'), data);
   return ref.id;
 }
 
 export async function updateCandidate(id: string, data: Partial<Omit<Candidate, 'id'>>) {
-  await updateDoc(doc(db, 'candidates', id), data);
+  await updateDoc(userDoc('candidates', id), data);
 }
 
 export async function deleteCandidate(id: string) {
-  await deleteDoc(doc(db, 'candidates', id));
+  await deleteDoc(userDoc('candidates', id));
 }

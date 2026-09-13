@@ -1,19 +1,6 @@
-import {
-  collection,
-  doc,
-  getDoc,
-  getDocs,
-  limit as fsLimit,
-  orderBy,
-  query,
-  serverTimestamp,
-  updateDoc,
-  setDoc,
-} from 'firebase/firestore';
-import { db } from './firebase';
+import { doc, getDoc, getDocs, limit as fsLimit, orderBy, query, serverTimestamp, updateDoc, setDoc } from 'firebase/firestore';
 import { Audit, RatingValue, TrailEntry } from '../types';
-
-const col = collection(db, 'audits');
+import { userCollection, userDoc } from './scope';
 
 interface NewAuditInput {
   candidateId: string;
@@ -50,7 +37,7 @@ function toAudit(id: string, data: any): Audit {
 }
 
 export async function createAudit(input: NewAuditInput): Promise<string> {
-  const ref = doc(col);
+  const ref = doc(userCollection('audits'));
   const trail: TrailEntry[] = [{ ts: Date.now(), what: 'Audit started', who: input.auditorName }];
   await setDoc(ref, {
     ...input,
@@ -67,13 +54,13 @@ export async function createAudit(input: NewAuditInput): Promise<string> {
 }
 
 export async function getAudit(id: string): Promise<Audit | null> {
-  const snap = await getDoc(doc(db, 'audits', id));
+  const snap = await getDoc(userDoc('audits', id));
   if (!snap.exists()) return null;
   return toAudit(snap.id, snap.data());
 }
 
 export async function setRating(auditId: string, itemId: string, value: RatingValue | undefined) {
-  await updateDoc(doc(db, 'audits', auditId), {
+  await updateDoc(userDoc('audits', auditId), {
     [`ratings.${itemId}`]: value ?? null,
   });
 }
@@ -103,14 +90,14 @@ export async function completeTsSection(
 }
 
 async function appendResultUpdate(auditId: string, fields: Record<string, any>, entry: TrailEntry) {
-  const ref = doc(db, 'audits', auditId);
+  const ref = userDoc('audits', auditId);
   const snap = await getDoc(ref);
   const trail = snap.exists() ? (snap.data().trail ?? []) : [];
   await updateDoc(ref, { ...fields, trail: [...trail, entry] });
 }
 
 export async function signAudit(auditId: string, candidateName: string): Promise<number> {
-  const ref = doc(db, 'audits', auditId);
+  const ref = userDoc('audits', auditId);
   const snap = await getDoc(ref);
   if (!snap.exists()) throw new Error('Audit not found');
   if (snap.data().status === 'signed') {
@@ -130,6 +117,6 @@ export async function signAudit(auditId: string, candidateName: string): Promise
 }
 
 export async function listRecentAudits(count = 10): Promise<Audit[]> {
-  const snap = await getDocs(query(col, orderBy('createdAt', 'desc'), fsLimit(count)));
+  const snap = await getDocs(query(userCollection('audits'), orderBy('createdAt', 'desc'), fsLimit(count)));
   return snap.docs.map((d) => toAudit(d.id, d.data()));
 }

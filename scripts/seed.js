@@ -66,21 +66,22 @@ async function ensureAuditor() {
 }
 
 async function seed() {
-  await ensureAuditor();
+  const user = await ensureAuditor();
+  const userCol = (name) => collection(db, 'users', user.uid, name);
 
-  const processRef = doc(collection(db, 'processes'));
+  const processRef = doc(userCol('processes'));
   const processId = processRef.id;
 
   const batch = writeBatch(db);
   batch.set(processRef, { name: 'IBU Analysis' });
   KP.forEach((item, i) => {
-    batch.set(doc(collection(db, 'items')), { processId, section: 'kp', order: i, ...item });
+    batch.set(doc(userCol('items')), { processId, section: 'kp', order: i, ...item });
   });
   TS.forEach((item, i) => {
-    batch.set(doc(collection(db, 'items')), { processId, section: 'ts', order: i, ...item });
+    batch.set(doc(userCol('items')), { processId, section: 'ts', order: i, ...item });
   });
   CANDIDATES.forEach((c) => {
-    batch.set(doc(collection(db, 'candidates')), c);
+    batch.set(doc(userCol('candidates')), c);
   });
   await batch.commit();
 

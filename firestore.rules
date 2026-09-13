@@ -2,36 +2,32 @@ rules_version = '2';
 
 service cloud.firestore {
   match /databases/{database}/documents {
-    function signedIn() {
-      return request.auth != null;
-    }
-
+    // Every auditor's data lives under users/{uid}/... — an auditor can only
+    // read or write inside their own uid's subtree, so one signed-up account
+    // never sees another account's candidates, item bank, or audits, even
+    // though sign-up itself is open to anyone.
     match /users/{uid} {
-      allow read: if signedIn();
-      allow write: if signedIn() && request.auth.uid == uid;
-    }
+      allow read, write: if request.auth != null && request.auth.uid == uid;
 
-    match /candidates/{id} {
-      allow read, write: if signedIn();
-    }
+      match /candidates/{id} {
+        allow read, write: if request.auth != null && request.auth.uid == uid;
+      }
 
-    match /processes/{id} {
-      allow read, write: if signedIn();
-    }
+      match /processes/{id} {
+        allow read, write: if request.auth != null && request.auth.uid == uid;
+      }
 
-    match /items/{id} {
-      allow read, write: if signedIn();
-    }
+      match /items/{id} {
+        allow read, write: if request.auth != null && request.auth.uid == uid;
+      }
 
-    match /audits/{id} {
-      allow read, create: if signedIn();
-      // Once an audit is signed, the client can never write to it again —
-      // this is the real fix for the old app's stuck sign-off button
-      // (a UI DisplayMode.Disabled check that could desync from the data).
-      // Reopening a signed audit has to go through a supervisor tool that
-      // uses elevated (e.g. Admin SDK / Cloud Function) access, not this
-      // client-facing rule.
-      allow update: if signedIn() && resource.data.status != 'signed';
+      match /audits/{id} {
+        allow read, create: if request.auth != null && request.auth.uid == uid;
+        // Once an audit is signed, it can never be written again by anyone
+        // — including its own owner — matching the "locked, reopening needs
+        // a supervisor" note shown on the Sign-off screen.
+        allow update: if request.auth != null && request.auth.uid == uid && resource.data.status != 'signed';
+      }
     }
   }
 }
