@@ -28,12 +28,12 @@
     ],
     "extra": {
       "firebase": {
-        "apiKey": "",
-        "authDomain": "",
-        "projectId": "",
-        "storageBucket": "",
-        "messagingSenderId": "",
-        "appId": ""
+        "apiKey": "AIzaSyCmPmMS6fP1R0EfUuGWqdIJ5Ibrw-yM8Ls",
+        "authDomain": "competency-assess-2022-ab60a.firebaseapp.com",
+        "projectId": "competency-assess-2022-ab60a",
+        "storageBucket": "competency-assess-2022-ab60a.firebasestorage.app",
+        "messagingSenderId": "1015420765639",
+        "appId": "1:1015420765639:web:07c34aadf20a9e169c85e2"
       }
     }
   }

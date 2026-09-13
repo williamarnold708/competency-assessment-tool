@@ -31,33 +31,34 @@ npm install
 
 ### 1. Firebase project
 
-Create a Firebase project (or use an existing one) at
-[console.firebase.google.com](https://console.firebase.google.com), then:
+Already provisioned: project `competency-assess-2022-ab60a`, with
+Authentication (Email/Password) and Firestore (Standard edition) enabled,
+security rules deployed from `firestore.rules`, and its web app config
+already filled into `app.json` under `expo.extra.firebase`.
 
-1. Enable **Authentication > Email/Password**.
-2. Enable **Firestore Database** (production mode).
-3. Add a **Web app** to the project and copy its config into `app.json` under
-   `expo.extra.firebase` (apiKey, authDomain, projectId, storageBucket,
-   messagingSenderId, appId).
-4. Deploy the security rules and indexes in this repo:
-   ```bash
-   npx firebase-tools login
-   npx firebase-tools use --add   # pick your project
-   npx firebase-tools deploy --only firestore
-   ```
+To point this app at a different Firebase project instead, create one at
+[console.firebase.google.com](https://console.firebase.google.com), enable
+Authentication > Email/Password and Firestore Database, add a Web app and
+copy its config into `app.json`, then:
+
+```bash
+npx firebase-tools login
+npx firebase-tools use --add   # pick your project
+npx firebase-tools deploy --only firestore
+```
 
 ### 2. Seed sample data (optional)
-
-Download a service account key (Project settings > Service accounts >
-Generate new private key) and save it as `scripts/serviceAccountKey.json`
-(gitignored), then:
 
 ```bash
 node scripts/seed.js
 ```
 
-This loads the prototype's sample "IBU Analysis" item bank and four sample
-candidates, so the app isn't empty on first run.
+This creates a bootstrap auditor account (`auditor@example.com` /
+`ChangeMe123!` by default — override with `SEED_EMAIL`/`SEED_PASSWORD`/
+`SEED_NAME` env vars) and loads the prototype's sample "IBU Analysis" item
+bank plus four sample candidates, so the app isn't empty on first run. Safe
+to re-run — it signs in instead of re-creating the account if it already
+exists, though re-running does add duplicate items/candidates.
 
 ### 3. Run the app
 

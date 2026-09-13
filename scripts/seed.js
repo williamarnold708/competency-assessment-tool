@@ -1,17 +1,25 @@
 // One-off seed script — loads the Claude Design prototype's sample IBU
-// Analysis item bank and sample candidates into Firestore.
+// Analysis item bank and sample candidates into Firestore, using the same
+// client SDK and config as the app (Firestore rules only require a signed-in
+// user, so no service account/admin credentials are needed).
 //
 // Usage:
-//   1. Download a service account key for your Firebase project
-//      (Project settings > Service accounts > Generate new private key)
-//      and save it as scripts/serviceAccountKey.json (gitignored).
-//   2. node scripts/seed.js
+//   SEED_EMAIL=you@company.com SEED_PASSWORD=... node scripts/seed.js
+// (creates that auditor account if it doesn't exist yet, then seeds data)
 
-const admin = require('firebase-admin');
-const serviceAccount = require('./serviceAccountKey.json');
+const { initializeApp } = require('firebase/app');
+const { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword } = require('firebase/auth');
+const { getFirestore, collection, doc, writeBatch, setDoc } = require('firebase/firestore');
+const appJson = require('../app.json');
 
-admin.initializeApp({ credential: admin.credential.cert(serviceAccount) });
-const db = admin.firestore();
+const firebaseConfig = appJson.expo.extra.firebase;
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getFirestore(app);
+
+const SEED_EMAIL = process.env.SEED_EMAIL || 'auditor@example.com';
+const SEED_PASSWORD = process.env.SEED_PASSWORD || 'ChangeMe123!';
+const SEED_NAME = process.env.SEED_NAME || 'Demo Auditor';
 
 const KP = [
   { text: 'States the purpose of the IBU analysis and its spec range', category: 'Purpose', critical: false },
@@ -41,26 +49,44 @@ const CANDIDATES = [
   { name: 'Lena Brandt', role: 'Analyst', expectedLevelDefault: 5 },
 ];
 
+async function ensureAuditor() {
+  try {
+    const cred = await createUserWithEmailAndPassword(auth, SEED_EMAIL, SEED_PASSWORD);
+    await setDoc(doc(db, 'users', cred.user.uid), { name: SEED_NAME, email: SEED_EMAIL });
+    console.log(`Created auditor account ${SEED_EMAIL} (password: ${SEED_PASSWORD} — sign in with this in the app, or use "Create account" for your own).`);
+    return cred.user;
+  } catch (err) {
+    if (err.code === 'auth/email-already-in-use') {
+      const cred = await signInWithEmailAndPassword(auth, SEED_EMAIL, SEED_PASSWORD);
+      console.log(`Signed in as existing auditor ${SEED_EMAIL}.`);
+      return cred.user;
+    }
+    throw err;
+  }
+}
+
 async function seed() {
-  const processRef = await db.collection('processes').add({ name: 'IBU Analysis' });
+  await ensureAuditor();
+
+  const processRef = doc(collection(db, 'processes'));
   const processId = processRef.id;
 
-  const batch = db.batch();
+  const batch = writeBatch(db);
+  batch.set(processRef, { name: 'IBU Analysis' });
   KP.forEach((item, i) => {
-    const ref = db.collection('items').doc();
-    batch.set(ref, { processId, section: 'kp', order: i, ...item });
+    batch.set(doc(collection(db, 'items')), { processId, section: 'kp', order: i, ...item });
   });
   TS.forEach((item, i) => {
-    const ref = db.collection('items').doc();
-    batch.set(ref, { processId, section: 'ts', order: i, ...item });
+    batch.set(doc(collection(db, 'items')), { processId, section: 'ts', order: i, ...item });
   });
   CANDIDATES.forEach((c) => {
-    const ref = db.collection('candidates').doc();
-    batch.set(ref, c);
+    batch.set(doc(collection(db, 'candidates')), c);
   });
   await batch.commit();
 
-  console.log(`Seeded process "IBU Analysis" (${processId}) with ${KP.length} KP items, ${TS.length} TS items, and ${CANDIDATES.length} candidates.`);
+  console.log(
+    `Seeded process "IBU Analysis" (${processId}) with ${KP.length} KP items, ${TS.length} TS items, and ${CANDIDATES.length} candidates.`
+  );
   process.exit(0);
 }
 
