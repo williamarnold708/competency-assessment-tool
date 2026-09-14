@@ -127,10 +127,11 @@ export default function AdminTaskDetailScreen({ route, navigation }: Props) {
               </View>
 
               <View style={styles.scenarioBlock}>
-                <Text style={styles.scenarioLabel}>Scenario</Text>
+                <Text style={styles.scenarioLabel}>Scenario (optional)</Text>
                 <Text style={styles.scenarioHint}>
-                  Describe the situation the candidate is troubleshooting. The questions below are answered against
-                  this scenario — auditors see it on the Troubleshooting screen during the audit.
+                  Describe the situation the candidate is troubleshooting, if the questions below need one for
+                  context. Leave it blank to just ask standalone questions — auditors only see a scenario box during
+                  the audit if you've written one here.
                 </Text>
                 <TextInput
                   style={[styles.input, styles.scenarioInput]}
@@ -149,7 +150,7 @@ export default function AdminTaskDetailScreen({ route, navigation }: Props) {
                 />
               </View>
 
-              <Text style={styles.questionsLabel}>Questions based on this scenario</Text>
+              <Text style={styles.questionsLabel}>{savedScenario ? 'Questions based on this scenario' : 'Questions'}</Text>
               {renderItemList('ts')}
               <Button
                 label="+ Add questions"
