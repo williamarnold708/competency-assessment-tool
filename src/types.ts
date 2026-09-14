@@ -12,6 +12,9 @@ export interface Candidate {
 export interface ProcessItem {
   id: string;
   name: string;
+  // The troubleshooting scenario shown above the 'ts' section's questions —
+  // written once per task so the questions can reference it.
+  scenario?: string;
 }
 
 export interface ChecklistItem {

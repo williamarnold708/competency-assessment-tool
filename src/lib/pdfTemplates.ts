@@ -40,7 +40,7 @@ ${FONT_LINK}
       <div class="stat-value">${audit.kpScore}%</div>
     </div>
     <div>
-      <div class="stat-label">TS score</div>
+      <div class="stat-label">Troubleshooting score</div>
       <div class="stat-value">${audit.tsScore}%</div>
     </div>
     <div>

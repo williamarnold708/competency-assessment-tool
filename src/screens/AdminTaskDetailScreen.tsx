@@ -1,13 +1,13 @@
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { useFocusEffect } from '@react-navigation/native';
 import React, { useCallback, useState } from 'react';
-import { Alert, Pressable, SafeAreaView, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Alert, Pressable, SafeAreaView, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 import Button from '../components/Button';
 import ScreenHeader from '../components/ScreenHeader';
 import { CriticalTag } from '../components/Tag';
 import { RootStackParamList } from '../navigation/types';
 import { deleteItem, listItemsForProcess } from '../services/items';
-import { deleteProcess } from '../services/processes';
+import { deleteProcess, getProcess, updateProcessScenario } from '../services/processes';
 import { ChecklistItem, Section } from '../types';
 import { color, font } from '../theme/tokens';
 
@@ -16,12 +16,18 @@ type Props = NativeStackScreenProps<RootStackParamList, 'AdminTaskDetail'>;
 export default function AdminTaskDetailScreen({ route, navigation }: Props) {
   const { processId, processName } = route.params;
   const [items, setItems] = useState<ChecklistItem[]>([]);
+  const [scenario, setScenario] = useState('');
+  const [savedScenario, setSavedScenario] = useState('');
+  const [savingScenario, setSavingScenario] = useState(false);
   const [loading, setLoading] = useState(true);
 
   const load = useCallback(async () => {
     setLoading(true);
     try {
-      setItems(await listItemsForProcess(processId));
+      const [its, process] = await Promise.all([listItemsForProcess(processId), getProcess(processId)]);
+      setItems(its);
+      setScenario(process?.scenario ?? '');
+      setSavedScenario(process?.scenario ?? '');
     } finally {
       setLoading(false);
     }
@@ -36,6 +42,16 @@ export default function AdminTaskDetailScreen({ route, navigation }: Props) {
   async function onDeleteItem(itemId: string) {
     await deleteItem(itemId);
     load();
+  }
+
+  async function onSaveScenario() {
+    setSavingScenario(true);
+    try {
+      await updateProcessScenario(processId, scenario.trim());
+      setSavedScenario(scenario.trim());
+    } finally {
+      setSavingScenario(false);
+    }
   }
 
   function onDeleteTask() {
@@ -53,15 +69,10 @@ export default function AdminTaskDetailScreen({ route, navigation }: Props) {
     ]);
   }
 
-  function renderSection(section: Section, title: string) {
+  function renderItemList(section: Section) {
     const sectionItems = items.filter((i) => i.section === section);
     return (
-      <View style={styles.section}>
-        <View style={styles.sectionHeader}>
-          <Text style={styles.sectionLabel}>
-            {title} · {sectionItems.length}
-          </Text>
-        </View>
+      <>
         {sectionItems.map((it, i) => (
           <Pressable
             key={it.id}
@@ -79,15 +90,11 @@ export default function AdminTaskDetailScreen({ route, navigation }: Props) {
           </Pressable>
         ))}
         {sectionItems.length === 0 && <Text style={styles.empty}>No items yet.</Text>}
-        <Button
-          label="+ Add items"
-          variant="secondary"
-          onPress={() => navigation.navigate('AdminBulkAddItems', { processId, section })}
-          fullWidth
-        />
-      </View>
+      </>
     );
   }
+
+  const scenarioDirty = scenario.trim() !== savedScenario;
 
   return (
     <SafeAreaView style={styles.screen}>
@@ -97,8 +104,60 @@ export default function AdminTaskDetailScreen({ route, navigation }: Props) {
       <ScrollView contentContainerStyle={styles.content}>
         {!loading && (
           <>
-            {renderSection('kp', 'Knowledge & practice')}
-            {renderSection('ts', 'Technique & skill')}
+            <View style={styles.section}>
+              <View style={styles.sectionHeader}>
+                <Text style={styles.sectionLabel}>
+                  Knowledge & practice · {items.filter((i) => i.section === 'kp').length}
+                </Text>
+              </View>
+              {renderItemList('kp')}
+              <Button
+                label="+ Add items"
+                variant="secondary"
+                onPress={() => navigation.navigate('AdminBulkAddItems', { processId, section: 'kp' })}
+                fullWidth
+              />
+            </View>
+
+            <View style={styles.section}>
+              <View style={styles.sectionHeader}>
+                <Text style={styles.sectionLabel}>
+                  Troubleshooting · {items.filter((i) => i.section === 'ts').length}
+                </Text>
+              </View>
+
+              <View style={styles.scenarioBlock}>
+                <Text style={styles.scenarioLabel}>Scenario</Text>
+                <Text style={styles.scenarioHint}>
+                  Describe the situation the candidate is troubleshooting. The questions below are answered against
+                  this scenario — auditors see it on the Troubleshooting screen during the audit.
+                </Text>
+                <TextInput
+                  style={[styles.input, styles.scenarioInput]}
+                  value={scenario}
+                  onChangeText={setScenario}
+                  placeholder={'e.g. The IBU result comes back 40% lower than the expected range for this recipe. Walk through how you would identify the cause.'}
+                  multiline
+                />
+                <Button
+                  label={savingScenario ? 'Saving…' : 'Save scenario'}
+                  variant="secondary"
+                  onPress={onSaveScenario}
+                  disabled={!scenarioDirty}
+                  loading={savingScenario}
+                  fullWidth
+                />
+              </View>
+
+              <Text style={styles.questionsLabel}>Questions based on this scenario</Text>
+              {renderItemList('ts')}
+              <Button
+                label="+ Add questions"
+                variant="secondary"
+                onPress={() => navigation.navigate('AdminBulkAddItems', { processId, section: 'ts' })}
+                fullWidth
+              />
+            </View>
           </>
         )}
         <Pressable onPress={onDeleteTask}>
@@ -122,4 +181,20 @@ const styles = StyleSheet.create({
   deleteLink: { fontFamily: font.semibold, fontSize: 12, color: color.accent700 },
   empty: { fontFamily: font.body, fontSize: 13, color: color.neutral600, paddingVertical: 8 },
   deleteTaskLink: { fontFamily: font.semibold, fontSize: 13, color: color.accent700, textAlign: 'center' },
+  scenarioBlock: { backgroundColor: color.surface, padding: 14, gap: 8, marginBottom: 4 },
+  scenarioLabel: { fontFamily: font.semibold, fontSize: 11, letterSpacing: 1, color: color.text, textTransform: 'uppercase' },
+  scenarioHint: { fontFamily: font.body, fontSize: 12, color: color.neutral700, lineHeight: 17 },
+  input: {
+    minHeight: 44,
+    paddingHorizontal: 12,
+    paddingVertical: 10,
+    backgroundColor: color.bg,
+    borderWidth: 1,
+    borderColor: color.divider,
+    fontFamily: font.body,
+    fontSize: 14,
+    color: color.text,
+  },
+  scenarioInput: { minHeight: 90, textAlignVertical: 'top' },
+  questionsLabel: { fontFamily: font.semibold, fontSize: 11, letterSpacing: 1, color: color.neutral600, textTransform: 'uppercase', marginTop: 4 },
 });

@@ -10,6 +10,7 @@ import { awardedLevel, ratedCount as countRated, scoreSection } from '../lib/sco
 import { RootStackParamList } from '../navigation/types';
 import { completeKpSection, completeTsSection, getAudit, setRating } from '../services/audits';
 import { listItems } from '../services/items';
+import { getProcess } from '../services/processes';
 import { Audit, ChecklistItem, RatingValue } from '../types';
 import { color, font } from '../theme/tokens';
 
@@ -20,6 +21,7 @@ export default function ChecklistScreen({ route, navigation }: Props) {
   const [audit, setAudit] = useState<Audit | null>(null);
   const [items, setItems] = useState<ChecklistItem[]>([]);
   const [ratings, setRatings] = useState<Record<string, RatingValue>>({});
+  const [scenario, setScenario] = useState('');
   const [loading, setLoading] = useState(true);
   const [advancing, setAdvancing] = useState(false);
 
@@ -31,6 +33,10 @@ export default function ChecklistScreen({ route, navigation }: Props) {
       setAudit(a);
       setItems(its);
       setRatings(a.ratings);
+      if (section === 'ts') {
+        const process = await getProcess(a.processId);
+        setScenario(process?.scenario ?? '');
+      }
       setLoading(false);
     })();
   }, [auditId, section]);
@@ -72,7 +78,7 @@ export default function ChecklistScreen({ route, navigation }: Props) {
   return (
     <SafeAreaView style={styles.screen}>
       <View style={styles.headerWrap}>
-        <ScreenHeader title={section === 'kp' ? 'Knowledge' : 'Technique'} onBack={() => navigation.goBack()} />
+        <ScreenHeader title={section === 'kp' ? 'Knowledge' : 'Troubleshooting'} onBack={() => navigation.goBack()} />
       </View>
       <ScrollView contentContainerStyle={styles.content}>
         <View style={styles.auditLineRow}>
@@ -84,6 +90,13 @@ export default function ChecklistScreen({ route, navigation }: Props) {
           </Text>
         </View>
         <ProgressCells values={items.map((it) => ratings[it.id])} />
+
+        {section === 'ts' && !!scenario && (
+          <View style={styles.scenarioCard}>
+            <Text style={styles.scenarioLabel}>Scenario</Text>
+            <Text style={styles.scenarioText}>{scenario}</Text>
+          </View>
+        )}
 
         <View style={styles.list}>
           {items.map((item, i) => (
@@ -107,7 +120,7 @@ export default function ChecklistScreen({ route, navigation }: Props) {
           label={
             allDone
               ? section === 'kp'
-                ? 'Continue to technique'
+                ? 'Continue to troubleshooting'
                 : 'See result'
               : `Rate all ${items.length} to continue`
           }
@@ -128,6 +141,9 @@ const styles = StyleSheet.create({
   auditLineRow: { flexDirection: 'row', alignItems: 'baseline', justifyContent: 'space-between', gap: 10 },
   auditLine: { fontFamily: font.body, fontSize: 13, color: color.neutral700 },
   progressLabel: { fontFamily: font.semibold, fontSize: 13, color: color.text },
+  scenarioCard: { backgroundColor: color.surface, padding: 14, gap: 6 },
+  scenarioLabel: { fontFamily: font.semibold, fontSize: 10.5, letterSpacing: 1.2, color: color.neutral600, textTransform: 'uppercase' },
+  scenarioText: { fontFamily: font.body, fontSize: 14, color: color.text, lineHeight: 20 },
   list: { borderTopWidth: 2, borderColor: color.text, borderBottomWidth: 2 },
   row: { paddingVertical: 14, borderBottomWidth: 1, borderColor: color.neutral300, gap: 10 },
   rowTop: { flexDirection: 'row', gap: 10, alignItems: 'flex-start' },

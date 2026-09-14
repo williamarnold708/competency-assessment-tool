@@ -37,21 +37,26 @@ export default function AdminBulkAddItemsScreen({ route, navigation }: Props) {
   return (
     <SafeAreaView style={styles.screen}>
       <View style={styles.headerWrap}>
-        <ScreenHeader title={section === 'kp' ? 'Add knowledge items' : 'Add technique items'} onBack={() => navigation.goBack()} />
+        <ScreenHeader title={section === 'kp' ? 'Add knowledge items' : 'Add troubleshooting questions'} onBack={() => navigation.goBack()} />
       </View>
       <ScrollView contentContainerStyle={styles.content}>
         <Text style={styles.hint}>
-          One item per line — paste or type a whole list at once. Category and Critical below apply to every line;
-          you can fine-tune individual items afterward from the task screen.
+          {section === 'ts'
+            ? 'One question per line — write them against the scenario you set on the task screen. Category and Critical below apply to every line; fine-tune individual items afterward.'
+            : 'One item per line — paste or type a whole list at once. Category and Critical below apply to every line; you can fine-tune individual items afterward from the task screen.'}
         </Text>
 
         <View style={styles.field}>
-          <Text style={styles.fieldLabel}>Items ({lines.length})</Text>
+          <Text style={styles.fieldLabel}>{section === 'ts' ? 'Questions' : 'Items'} ({lines.length})</Text>
           <TextInput
             style={[styles.input, styles.textArea]}
             value={text}
             onChangeText={setText}
-            placeholder={'Confirms sample identity against the batch record\nExplains the spectrophotometer blanking procedure\n...'}
+            placeholder={
+              section === 'ts'
+                ? 'What would you check first, and why?\nHow would you confirm that diagnosis before acting on it?\n...'
+                : 'Confirms sample identity against the batch record\nExplains the spectrophotometer blanking procedure\n...'
+            }
             multiline
             autoFocus
           />
@@ -68,7 +73,11 @@ export default function AdminBulkAddItemsScreen({ route, navigation }: Props) {
         </Pressable>
 
         <Button
-          label={lines.length > 1 ? `Add ${lines.length} items` : lines.length === 1 ? 'Add item' : 'Add items'}
+          label={
+            lines.length > 1
+              ? `Add ${lines.length} ${section === 'ts' ? 'questions' : 'items'}`
+              : `Add ${section === 'ts' ? 'question' : 'item'}`
+          }
           onPress={save}
           disabled={lines.length === 0}
           loading={saving}

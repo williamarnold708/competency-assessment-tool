@@ -50,7 +50,7 @@ export default function ResultScreen({ route, navigation }: Props) {
 
   const breakdown = [
     { label: 'Knowledge items rated correct', value: `${kpCorrect} of ${kpItems.length}`, danger: false },
-    { label: 'Technique items rated correct', value: `${tsCorrect} of ${tsItems.length}`, danger: false },
+    { label: 'Troubleshooting questions rated correct', value: `${tsCorrect} of ${tsItems.length}`, danger: false },
     { label: 'Critical items failed', value: String(critFails), danger: true },
     { label: 'Marked not applicable', value: String(naCount), danger: false },
   ];
@@ -75,7 +75,7 @@ export default function ResultScreen({ route, navigation }: Props) {
             </View>
           </View>
           <View style={styles.scoreCell}>
-            <StatBlock label="TS score" value={`${audit.tsScore}%`} size="lg" />
+            <StatBlock label="Troubleshooting score" value={`${audit.tsScore}%`} size="lg" />
             <View style={styles.bar}>
               <View style={[styles.barFill, { width: `${audit.tsScore}%` }]} />
             </View>

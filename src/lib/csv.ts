@@ -14,7 +14,7 @@ const HEADERS = [
   'Auditor',
   'Status',
   'K&P score',
-  'TS score',
+  'Troubleshooting score',
   'Awarded level',
   'Expected level',
   'Gap',
