@@ -49,7 +49,8 @@ export interface Audit {
   tsScore: number;
   awardedLevel: number;
   status: AuditStatus;
-  signedAt: number | null; // epoch millis
+  auditorSignedAt: number | null; // epoch millis — the auditor's own confirmation, before handing over
+  signedAt: number | null; // epoch millis — the auditee's confirmation
   createdAt: number;
   trail: TrailEntry[];
 }

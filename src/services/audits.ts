@@ -27,6 +27,7 @@ function toAudit(id: string, data: any): Audit {
     tsScore: data.tsScore ?? 0,
     awardedLevel: data.awardedLevel ?? 0,
     status: data.status,
+    auditorSignedAt: data.auditorSignedAt?.toMillis ? data.auditorSignedAt.toMillis() : data.auditorSignedAt ?? null,
     signedAt: data.signedAt?.toMillis ? data.signedAt.toMillis() : data.signedAt ?? null,
     createdAt: data.createdAt?.toMillis ? data.createdAt.toMillis() : data.createdAt ?? Date.now(),
     trail: (data.trail ?? []).map((t: any) => ({
@@ -46,6 +47,7 @@ export async function createAudit(input: NewAuditInput): Promise<string> {
     tsScore: 0,
     awardedLevel: 0,
     status: 'in_progress',
+    auditorSignedAt: null,
     signedAt: null,
     createdAt: serverTimestamp(),
     trail,
@@ -83,7 +85,7 @@ export async function completeTsSection(
 ) {
   const entry: TrailEntry = {
     ts: Date.now(),
-    what: `Technique section completed — ${ratedCount} of ${total} rated`,
+    what: `Troubleshooting section completed — ${ratedCount} of ${total} rated`,
     who: 'System',
   };
   await appendResultUpdate(auditId, { tsScore, awardedLevel, status: 'awaiting_signoff' }, entry);
@@ -94,6 +96,25 @@ async function appendResultUpdate(auditId: string, fields: Record<string, any>, 
   const snap = await getDoc(ref);
   const trail = snap.exists() ? (snap.data().trail ?? []) : [];
   await updateDoc(ref, { ...fields, trail: [...trail, entry] });
+}
+
+export async function signAuditAsAuditor(auditId: string, auditorName: string): Promise<number> {
+  const ref = userDoc('audits', auditId);
+  const snap = await getDoc(ref);
+  if (!snap.exists()) throw new Error('Audit not found');
+  const existing = snap.data().auditorSignedAt;
+  if (existing) {
+    // Already confirmed by the auditor — never allow a second write.
+    return existing?.toMillis ? existing.toMillis() : existing;
+  }
+  const signedAtMs = Date.now();
+  const trail = snap.data().trail ?? [];
+  const entry: TrailEntry = { ts: signedAtMs, what: 'Auditor confirmed', who: auditorName };
+  await updateDoc(ref, {
+    auditorSignedAt: signedAtMs,
+    trail: [...trail, entry],
+  });
+  return signedAtMs;
 }
 
 export async function signAudit(auditId: string, candidateName: string): Promise<number> {
